@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+
+amd=$(buildah from --arch=amd64 scratch)
+arm=$(buildah from --arch=arm64 scratch)
+buildah config --created-by "Gianluca" "${amd}"
+buildah config --created-by "Gianluca" "${arm}"
+buildah copy "${amd}" README.md
+buildah copy "${arm}" README.md
+amdid=$(buildah commit --format=docker --rm "${amd}")
+armid=$(buildah commit --format=docker --rm "${arm}")
+name="localhost/multi-with-buildah"
+buildah manifest create "${name}" "${amdid}" "${armid}"
+
+podman manifest push --all "${name}" dir:container
